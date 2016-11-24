@@ -84,6 +84,10 @@ func deletePods(kubeClient clientset.Interface, recorder record.EventRecorder, n
 		if err == nil { // No error means at least one daemonset was found
 			continue
 		}
+		// if pod is completed, ignore it
+		if pod.Status.Phase == api.PodFailed || pod.Status.Phase == api.PodSucceeded {
+			continue
+		}
 
 		glog.V(2).Infof("Starting deletion of pod %v", pod.Name)
 		recorder.Eventf(&pod, v1.EventTypeNormal, "NodeControllerEviction", "Marking for deletion Pod %s from Node %s", pod.Name, nodeName)
